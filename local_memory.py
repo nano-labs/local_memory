@@ -90,8 +90,8 @@ class SharedMemoryDict(object):
         if attr == 'connected_clients':
             self.mm.seek(self.size)
             return int(self.mm.read(5))
-        # else:
-        #     return super(SharedMemoryDict, self).__getattr__(attr)
+        else:
+            return super(SharedMemoryDict, self).__getattr__(attr)
 
     def __setattr__(self, attr, value):
         """Setter."""
@@ -110,6 +110,10 @@ class SharedMemoryDict(object):
     def get(self, key, default=None):
         u"""Não seria um dict-like se não tivesse um .get."""
         return self.get_dict().get(key, default)
+
+    def keys(self):
+        u"""Retorna todas as chaves do dicionário em RAM."""
+        return self.get_dict().keys()
 
     def pop(self, key):
         """Retorna o valor da chave e a remove."""
@@ -166,11 +170,13 @@ class SharedMemoryDict(object):
 
     def __setitem__(self, key, value):
         u"""
-        Permite ler um valor da memória usando uma chave.
+        Permite escrever um valor da memória usando uma chave.
 
         Ex:
         >>> obj = SharedMemoryDict(name='foo')
         >>> obj['bar'] = 'Hello World'
+        >>> print obj['bar']
+        Hello World
         """
         whole_data = self.get_dict()
         whole_data[key] = value
@@ -256,7 +262,11 @@ class Cache(SharedMemoryDict):
             return super(Cache, self).__setattr__(attr, value)
 
     def get_dict(self):
-        u"""Retorna o conteúdo da memória em um dict."""
+        u"""
+        Retorna o conteúdo da memória em um dict.
+
+        Também verifica se existem chaves expiradas e as remove.
+        """
         data = json.loads(self._dump_data())
         expiration_data = self.get_expiration_dict()
         updated = False
@@ -284,7 +294,7 @@ class Cache(SharedMemoryDict):
         self.set_expiration(key, None)
 
     def get_expiration(self, key):
-        u"""Não seria um dict-like se não tivesse um .get."""
+        u"""Verifica a expiração de uma dada chave."""
         return self.get_expiration_dict().get(key, None)
 
     def set_expiration(self, key, expiration):
@@ -322,7 +332,9 @@ class Cache(SharedMemoryDict):
 
     def __setitem__(self, key, value):
         u"""
-        Permite ler um valor da memória usando uma chave.
+        Permite escrever um valor da memória usando uma chave.
+
+        Define a expiração padrão, se houver.
 
         Ex:
         >>> obj = SharedMemoryDict(name='foo')
