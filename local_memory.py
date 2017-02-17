@@ -81,26 +81,34 @@ class SharedMemoryDict(object):
         self.mm.seek(0)
         return self.mm.read(self.size)
 
-    def __dir__(self):
-        """Adiciona 'connected_clients' a lista do comando 'dir'."""
-        return ['connected_clients']
+    @property
+    def connected_clients(self):
+        """I'm the 'x' property."""
+        self.mm.seek(self.size)
+        return int(self.mm.read(5))
 
-    def __getattr__(self, attr):
-        """Getter."""
-        if attr == 'connected_clients':
-            self.mm.seek(self.size)
-            return int(self.mm.read(5))
-        else:
-            return super(SharedMemoryDict, self).__getattr__(attr)
+    @connected_clients.setter
+    def connected_clients(self, value):
+        value = '%05d' % value
+        self.mm.seek(self.size)
+        self.mm.write(value)
 
-    def __setattr__(self, attr, value):
-        """Setter."""
-        if attr == 'connected_clients':
-            value = '%05d' % value
-            self.mm.seek(self.size)
-            self.mm.write(value)
-        else:
-            return super(SharedMemoryDict, self).__setattr__(attr, value)
+    # def __getattr__(self, attr):
+    #     """Getter."""
+    #     if attr == 'connected_clients':
+    #         self.mm.seek(self.size)
+    #         return int(self.mm.read(5))
+    #     else:
+    #         return super(SharedMemoryDict, self).__getattr__(attr)
+
+    # def __setattr__(self, attr, value):
+    #     """Setter."""
+    #     if attr == 'connected_clients':
+    #         value = '%05d' % value
+    #         self.mm.seek(self.size)
+    #         self.mm.write(value)
+    #     else:
+    #         return super(SharedMemoryDict, self).__setattr__(attr, value)
 
     def get_dict(self):
         u"""Retorna o conteúdo da memória em um dict."""
@@ -133,7 +141,7 @@ class SharedMemoryDict(object):
 
     def write(self, dict_data):
         u"""De fato escreve o conteúdo na memória."""
-        self._flush_data()
+        self._flush_memory()
         json_string = json.dumps(dict_data)
         self.mm.write(json_string)
 
