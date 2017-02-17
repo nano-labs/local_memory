@@ -29,7 +29,7 @@ Second process:
 {'hello': 'world'}
 ```
 
-Or given a name for the dict
+Or give a name for the shared memory
 First process:
 ```python
 >>> from local_memory import SharedMemoryDict
