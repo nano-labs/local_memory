@@ -1,12 +1,12 @@
 # Local Memory Utils
 
-Some tools that I made to help me in some projects
+Tools that allows you to share data between python instances using some mapped shared memory or to use this shared memory as a local memory cache container.
 
 ## SharedMemoryDict
 
-![N](https://github.com/nano-labs/local_memory/blob/master/anim.gif)
-
 Dict-like object that allow you to share data between various applications on same computer
+
+![N](https://github.com/nano-labs/local_memory/blob/master/anim.gif)
 
 ###Usage:
 
