@@ -83,32 +83,16 @@ class SharedMemoryDict(object):
 
     @property
     def connected_clients(self):
-        """I'm the 'x' property."""
+        """How many instances this dict have over the processes."""
         self.mm.seek(self.size)
         return int(self.mm.read(5))
 
     @connected_clients.setter
     def connected_clients(self, value):
+        """Setter for connected_clients."""
         value = '%05d' % value
         self.mm.seek(self.size)
         self.mm.write(value)
-
-    # def __getattr__(self, attr):
-    #     """Getter."""
-    #     if attr == 'connected_clients':
-    #         self.mm.seek(self.size)
-    #         return int(self.mm.read(5))
-    #     else:
-    #         return super(SharedMemoryDict, self).__getattr__(attr)
-
-    # def __setattr__(self, attr, value):
-    #     """Setter."""
-    #     if attr == 'connected_clients':
-    #         value = '%05d' % value
-    #         self.mm.seek(self.size)
-    #         self.mm.write(value)
-    #     else:
-    #         return super(SharedMemoryDict, self).__setattr__(attr, value)
 
     def get_dict(self):
         u"""Retorna o conteúdo da memória em um dict."""
@@ -252,22 +236,18 @@ class Cache(SharedMemoryDict):
         self.mm.seek(self.size)
         return self.mm.read(self.size)
 
-    def __getattr__(self, attr):
-        """Getter."""
-        if attr == 'connected_clients':
-            self.mm.seek(self.size * 2)
-            return int(self.mm.read(5))
-        # else:
-        #     return super(Cache, self).__getattr__(attr)
+    @property
+    def connected_clients(self):
+        """How many instances this dict have over the processes."""
+        self.mm.seek(self.size * 2)
+        return int(self.mm.read(5))
 
-    def __setattr__(self, attr, value):
-        """Setter."""
-        if attr == 'connected_clients':
-            value = '%05d' % value
-            self.mm.seek(self.size * 2)
-            self.mm.write(value)
-        else:
-            return super(Cache, self).__setattr__(attr, value)
+    @connected_clients.setter
+    def connected_clients(self, value):
+        """Setter for connected_clients."""
+        value = '%05d' % value
+        self.mm.seek(self.size * 2)
+        self.mm.write(value)
 
     def get_dict(self):
         u"""
@@ -335,7 +315,7 @@ class Cache(SharedMemoryDict):
     def _flush_memory(self):
         u"""Limpa todo o conteúdo e dados de expiração da memória."""
         self.mm.seek(0)
-        self.mm.write("{}%s{}%s" % (" " * (self.size - 2), ) * 2)
+        self.mm.write("{}%(v)s{}%(v)s" % {"v": " " * (self.size - 2)})
         self.mm.seek(0)
 
     def __setitem__(self, key, value):

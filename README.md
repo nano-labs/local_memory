@@ -24,7 +24,7 @@ First process:
 Second process:
 ```python
 >>> from local_memory import SharedMemoryDict
->>> bar = SharedMemoryDict(name='2125001920')  # Name fromm foo.name from first process
+>>> bar = SharedMemoryDict(name='2125001920')  # Got from foo.name on first process
 >>> bar
 {'hello': 'world'}
 ```
@@ -48,6 +48,41 @@ Second process:
 ```
 
 
-### Cache
+## Cache
 
 Simple local memory key-value Cache object. Allow you to set expiration time to a key
+
+![N](https://github.com/nano-labs/local_memory/blob/master/cache.gif)
+
+###Usage:
+
+First process:
+```python
+>>> from local_memory import Cache
+>>> cache = Cache(name="main")
+>>> cache["foo"] = "bar"
+```
+
+Second process:
+```python
+>>> from local_memory import Cache
+>>> cache = Cache("main")
+>>> print cache["foo"]
+bar
+```
+
+Setting expiration:
+```python
+>>> from local_memory import Cache
+>>> cache = Cache(name="main")
+>>> cache["foo"] = "bar"
+>>> print cache["foo"]
+bar
+>>> cache.set_expiration("foo", 5)  # key 'foo' will expire in 5 seconds
+>>> print cache["foo"]
+bar
+>>> print cache["foo"]
+bar
+>>> print cache["foo"]  # 5 seconds later
+None
+```
